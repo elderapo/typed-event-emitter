@@ -25,7 +25,7 @@
     "start": "rollup -c rollup.config.ts -w",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:prod": "yarn test -- --coverage --no-cache",
+    "test:prod": "yarn test-types && yarn test -- --coverage --no-cache",
     "test-types": "dtslint test/types --onlyTestTsNext",
     "deploy-docs": "ts-node tools/gh-pages-publish",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
