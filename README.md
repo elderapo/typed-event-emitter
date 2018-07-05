@@ -1,5 +1,7 @@
 # @elderapo/typed-event-emitter
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/elderapo/typed-event-emitter.svg)](https://greenkeeper.io/)
+
 Strongly typed similar event emitter with similar API to native [EventEmitter](https://nodejs.org/api/events.html).
 
 ### How to install
