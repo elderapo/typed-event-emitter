@@ -1,16 +1,22 @@
 import { getOrCreateFromMap } from "./utils";
 
-type RemoveEventListener = () => void;
-type Listener = {
+export type RemoveEventListener = () => void;
+
+export type EventHandler = (payload: any) => void;
+
+/**
+ * @hidden
+ */
+type ListenerItem = {
   once: boolean;
-  func: (payload: any) => void;
+  func: EventHandler;
 };
 
 export class TypedEventEmitter<Events> {
   private static defaultMaxListeners: number = 10;
 
   private maxListeners: number = TypedEventEmitter.defaultMaxListeners;
-  private listenersArrays: Map<keyof Events, Listener[]> = new Map();
+  private listenersArrays: Map<keyof Events, ListenerItem[]> = new Map();
 
   public on<Event extends keyof Events>(
     event: Event,
@@ -92,14 +98,14 @@ export class TypedEventEmitter<Events> {
     return this.maxListeners;
   }
 
-  public listeners<Event extends keyof Events>(event: Event): ((payload: Events[Event]) => void)[] {
+  public listeners<Event extends keyof Events>(event: Event): EventHandler[] {
     return this.getListenersArray(event).map(l => l.func);
   }
 
   public emit<Event extends keyof Events>(event: Event, payload: Events[Event]): void {
     const listenersArray = this.getListenersArray(event);
 
-    let listenersToRemove: Listener[] = [];
+    let listenersToRemove: ListenerItem[] = [];
 
     for (let listener of listenersArray) {
       listener.func(payload);
@@ -113,7 +119,7 @@ export class TypedEventEmitter<Events> {
     }
   }
 
-  public eventNames(): Array<keyof Events> {
+  public eventIdentifiers(): Array<keyof Events> {
     return Array.from(this.listenersArrays.keys());
   }
 
@@ -121,7 +127,7 @@ export class TypedEventEmitter<Events> {
     return this.getListenersArray(event).length;
   }
 
-  private getListenersArray<Event extends keyof Events>(event: Event): Listener[] {
+  private getListenersArray<Event extends keyof Events>(event: Event): ListenerItem[] {
     return getOrCreateFromMap(this.listenersArrays, event, []);
   }
 

@@ -249,7 +249,7 @@ describe("TypedEventEmitter test", () => {
     expect(eventEmitter.listeners(Event.SomeEvent2).length).toBe(4);
   });
 
-  it("eventNames", () => {
+  it("eventIdentifiers", () => {
     const enum Event {
       SomeEvent1,
       SomeEvent2 = "SomeEvent2"
@@ -273,7 +273,7 @@ describe("TypedEventEmitter test", () => {
     eventEmitter.on(Event.SomeEvent2, handler);
     eventEmitter.on(Event.SomeEvent2, handler);
 
-    expect(eventEmitter.eventNames()).toMatchObject([Event.SomeEvent1, Event.SomeEvent2]);
+    expect(eventEmitter.eventIdentifiers()).toMatchObject([Event.SomeEvent1, Event.SomeEvent2]);
   });
 
   it("listenerCount", () => {
