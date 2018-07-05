@@ -12,7 +12,9 @@ notifications:
 node_js:
   - "8"
 script:
-  - yarn install
+  - yarn
+  - node .\node_modules\typescript\bin\tsc --version
+  - echo "dtslint version:" && node .\node_modules\dtslint\bin\ --version
   - yarn test:prod && yarn build
 after_success:
   - yarn report-coverage
