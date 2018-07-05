@@ -10,7 +10,6 @@ cache:
 notifications:
   email: false
 node_js:
-  - node
 script:
   - yarn install
   - yarn test:prod && yarn build
