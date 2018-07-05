@@ -1,6 +1,6 @@
 # @elderapo/typed-event-emitter
 
-Strongly typed similar event emitter with similar API to native [EventEmitter](https://nodejs.org/api/events.html).
+Strongly typed event emitter with API similar to native [EventEmitter](https://nodejs.org/api/events.html).
 
 ### How to install
 
