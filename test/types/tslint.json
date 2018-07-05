@@ -1,0 +1,10 @@
+{
+  "extends": "dtslint/dtslint.json",
+  "rules": {
+    "no-implicit-dependencies": false,
+    "no-useless-files": false,
+    "void-return": false,
+    "interface-over-type-literal": false,
+    "interface-name": [true, "always-prefix"]
+  }
+}
