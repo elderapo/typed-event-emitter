@@ -12,8 +12,10 @@ notifications:
 node_js:
   - node
 script:
-  - npm run test:prod && npm run build
+  - yarn
+  # - yarn test:prod && yarn build # temporarly disabled because for some reason tslint doesn't work on travis
+  - yarn test-types && yarn test -- --coverage --no-cache # tmp
 after_success:
-  - npm run report-coverage
-  - npm run deploy-docs
-  - npm run semantic-release
+  - yarn report-coverage
+  - yarn deploy-docs
+  - yarn semantic-release
