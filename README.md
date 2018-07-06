@@ -1,6 +1,10 @@
 # @elderapo/typed-event-emitter
 
+[![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![Greenkeeper badge](https://badges.greenkeeper.io/elderapo/typed-event-emitter.svg)](https://greenkeeper.io/)
+[![Travis](https://img.shields.io/travis/elderapo/typed-event-emitter.svg)](https://travis-ci.org/alexjoverm/elderapo/typed-event-emitter)
+[![Coveralls](https://img.shields.io/coveralls/elderapo/typed-event-emitter.svg)](https://coveralls.io/github/elderapo/typed-event-emitter)
+[![Dev Dependencies](https://david-dm.org/elderapo/typed-event-emitter/dev-status.svg)](https://david-dm.org/elderapo/typed-event-emitter?type=dev)
 
 Strongly typed similar event emitter with similar API to native [EventEmitter](https://nodejs.org/api/events.html).
 
