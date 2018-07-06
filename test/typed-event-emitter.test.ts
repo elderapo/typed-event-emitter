@@ -327,4 +327,57 @@ describe("TypedEventEmitter test", () => {
 
     console.warn = originalConoleWarn;
   });
+
+  it("inheritance", done => {
+    expect.assertions(3);
+
+    enum IncommingEvent {
+      SomeData,
+      SomeOtherData,
+      SomeOtherOtherData = "some-other-other-data"
+    }
+
+    type IncommingEvents = {
+      [IncommingEvent.SomeData]: number[];
+      [IncommingEvent.SomeOtherData]: {};
+      [IncommingEvent.SomeOtherOtherData]: { name: string; age: number };
+    };
+
+    enum OutgoingEvent {
+      SendName = 3,
+      SendAge,
+      SendPerson = "send-person"
+    }
+
+    type OutgoingEvents = {
+      [OutgoingEvent.SendName]: string;
+      [OutgoingEvent.SendAge]: number;
+      [OutgoingEvent.SendPerson]: { name: string; age: number };
+    };
+
+    interface IMyEventEmitterEvents extends OutgoingEvents, IncommingEvents {}
+
+    class BidirectionalCommunication extends TypedEventEmitter<IMyEventEmitterEvents> {}
+
+    const ee = new BidirectionalCommunication();
+
+    ee.on(OutgoingEvent.SendName, payload => {
+      expect(payload).toBe("name");
+      done();
+    });
+
+    ee.on(OutgoingEvent.SendAge, payload => {
+      expect(payload).toBe(20);
+      done();
+    });
+
+    ee.on(IncommingEvent.SomeData, payload => {
+      expect(payload).toMatchObject([1, 2, 3]);
+      done();
+    });
+
+    ee.emit(OutgoingEvent.SendName, "name");
+    ee.emit(OutgoingEvent.SendAge, 20);
+    ee.emit(IncommingEvent.SomeData, [1, 2, 3]);
+  });
 });
