@@ -14,7 +14,7 @@ node_js:
 script:
   - yarn
   # - yarn test:prod && yarn build # temporarly disabled because for some reason tslint doesn't work on travis
-  yarn test-types && yarn test -- --coverage --no-cache # tmp
+  - yarn test-types && yarn test -- --coverage --no-cache # tmp
 after_success:
   - yarn report-coverage
   - yarn deploy-docs
