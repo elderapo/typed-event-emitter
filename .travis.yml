@@ -9,8 +9,7 @@ cache:
     - node_modules
 notifications:
   email: false
-node_js:
-  - '8'
+node_js: 8
 script:
   - yarn
   # - yarn test:prod && yarn build # temporarly disabled because for some reason tslint doesn't work on travis
@@ -18,7 +17,12 @@ script:
 after_success:
   - yarn report-coverage
   - yarn deploy-docs
-  - yarn travis-deploy-once "yarn semantic-release"
+  # - yarn travis-deploy-once "yarn semantic-release"
+deploy:
+  provider: script
+  skip_cleanup: true
+  script:
+    - npx semantic-release
 branches:
   except:
     - /^v\d+\.\d+\.\d+$/
