@@ -13,7 +13,7 @@ type ListenerItem = {
 };
 
 export class TypedEventEmitter<Events> {
-  private static defaultMaxListeners: number = 10;
+  public static defaultMaxListeners: number = 10;
 
   private maxListeners: number = TypedEventEmitter.defaultMaxListeners;
   private listenersArrays: Map<keyof Events, ListenerItem[]> = new Map();
