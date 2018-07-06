@@ -10,10 +10,7 @@ cache:
 notifications:
   email: false
 node_js:
-  - '9'
   - '8'
-  - '6'
-  - '4'
 script:
   - yarn
   # - yarn test:prod && yarn build # temporarly disabled because for some reason tslint doesn't work on travis
