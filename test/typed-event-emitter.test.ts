@@ -7,7 +7,7 @@ describe("TypedEventEmitter test", () => {
   it("on", done => {
     expect.assertions(2);
 
-    enum Event {
+    const enum Event {
       SomeEvent1,
       SomeEvent2
     }
@@ -36,7 +36,7 @@ describe("TypedEventEmitter test", () => {
   it("once", done => {
     expect.assertions(1);
 
-    enum Event {
+    const enum Event {
       SomeEvent
     }
 
@@ -66,7 +66,7 @@ describe("TypedEventEmitter test", () => {
   });
 
   it("prependListener", () => {
-    enum Event {
+    const enum Event {
       SomeEvent
     }
 
@@ -95,7 +95,7 @@ describe("TypedEventEmitter test", () => {
   });
 
   it("prependOnceListener", () => {
-    enum Event {
+    const enum Event {
       SomeEvent
     }
 
@@ -126,7 +126,7 @@ describe("TypedEventEmitter test", () => {
   it("removeListener", done => {
     expect.assertions(1);
 
-    enum Event {
+    const enum Event {
       SomeEvent
     }
 
@@ -172,7 +172,7 @@ describe("TypedEventEmitter test", () => {
   it("removeAllListeners", done => {
     expect.assertions(1);
 
-    enum Event {
+    const enum Event {
       SomeEvent
     }
 
@@ -222,7 +222,7 @@ describe("TypedEventEmitter test", () => {
   });
 
   it("listeners", () => {
-    enum Event {
+    const enum Event {
       SomeEvent1,
       SomeEvent2 = "SomeEvent2"
     }
@@ -250,7 +250,7 @@ describe("TypedEventEmitter test", () => {
   });
 
   it("eventIdentifiers", () => {
-    enum Event {
+    const enum Event {
       SomeEvent1,
       SomeEvent2 = "SomeEvent2"
     }
@@ -277,7 +277,7 @@ describe("TypedEventEmitter test", () => {
   });
 
   it("listenerCount", () => {
-    enum Event {
+    const enum Event {
       SomeEvent1,
       SomeEvent2,
       SomeEvent3
@@ -306,7 +306,7 @@ describe("TypedEventEmitter test", () => {
   });
 
   it("afterAddEventListener", () => {
-    enum Event {
+    const enum Event {
       SomeEvent
     }
 
