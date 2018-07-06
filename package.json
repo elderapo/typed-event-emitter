@@ -1,6 +1,6 @@
 {
   "name": "@elderapo/typed-event-emitter",
-  "version": "0.0.0-development",
+  "version": "1.2.0",
   "description": "",
   "keywords": [],
   "main": "dist/typed-event-emitter.umd.js",
