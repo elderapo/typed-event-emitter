@@ -9,6 +9,7 @@ test_script:
   - node --version
   - yarn --version
   - yarn test:prod
+  - yarn build
 
 # Don't actually build.
 build: off

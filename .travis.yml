@@ -13,11 +13,13 @@ node_js: 8
 script:
   - yarn
   # - yarn test:prod && yarn build # temporarly disabled because for some reason tslint doesn't work on travis
-  - yarn test-types && yarn test -- --coverage --no-cache && yarn build # tmp
+  # tmp:
+  - yarn test-types
+  - yarn test -- --coverage --no-cache
+  - yarn build
 after_success:
   - yarn report-coverage
   - yarn deploy-docs
-  # - yarn travis-deploy-once "yarn semantic-release"
 deploy:
   provider: script
   skip_cleanup: true
