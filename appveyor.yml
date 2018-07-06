@@ -3,11 +3,11 @@ environment:
 
 install:
   - ps: Install-Product node $env:nodejs_version
-  - yarn
-
-test_script:
   - node --version
   - yarn --version
+  - npm install # https://github.com/Microsoft/dtslint/issues/123
+
+test_script:
   - yarn test:prod
   - yarn build
 

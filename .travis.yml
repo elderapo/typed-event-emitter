@@ -11,11 +11,8 @@ notifications:
   email: false
 node_js: 8
 script:
-  - yarn
-  # - yarn test:prod && yarn build # temporarly disabled because for some reason tslint doesn't work on travis
-  # tmp:
-  - yarn test-types
-  - yarn test -- --coverage --no-cache
+  - npm install # https://github.com/Microsoft/dtslint/issues/123
+  - yarn test:prod
   - yarn build
 after_success:
   - yarn report-coverage
