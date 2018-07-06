@@ -6,7 +6,7 @@
 [![Coveralls](https://img.shields.io/coveralls/elderapo/typed-event-emitter.svg)](https://coveralls.io/github/elderapo/typed-event-emitter)
 [![Dev Dependencies](https://david-dm.org/elderapo/typed-event-emitter/dev-status.svg)](https://david-dm.org/elderapo/typed-event-emitter?type=dev)
 
-Strongly typed similar event emitter with similar API to native [EventEmitter](https://nodejs.org/api/events.html).
+Strongly typed event emitter with API similar to native [EventEmitter](https://nodejs.org/api/events.html).
 
 ### How to install
 
