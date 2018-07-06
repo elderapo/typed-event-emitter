@@ -1,5 +1,4 @@
 import { TypedEventEmitter } from "../src/typed-event-emitter";
-import { EventEmitter } from "events";
 
 const createNOPFunction = () => () => {}; // tslint:disable-line
 
@@ -214,7 +213,7 @@ describe("TypedEventEmitter test", () => {
   it("setMaxListeners/getMaxListeners", () => {
     const eventEmitter = new TypedEventEmitter<{}>();
 
-    expect(eventEmitter.getMaxListeners()).toBe(EventEmitter.defaultMaxListeners);
+    expect(eventEmitter.getMaxListeners()).toBe(TypedEventEmitter.defaultMaxListeners);
 
     eventEmitter.setMaxListeners(666);
 
