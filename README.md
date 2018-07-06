@@ -72,8 +72,10 @@ type IncommingEvents = {
   [IncommingEvent.SomeOtherOtherData]: { name: string; age: number };
 };
 
+// `OutgoingEvent.SendName = 3;` so it doesn't overlap with `IncommingEvent.SomeData = 0;`
+// Remove or set it to `0` and see what happens with `IMyEventEmitterEvents` :)
 enum OutgoingEvent {
-  SendName = 3, // So it doesn't overlap with IncommingEvent.SomeData. Remove it and see what happens with `IMyEventEmitterEvents` :)
+  SendName = 3,
   SendAge,
   SendPerson = "send-person"
 }
@@ -84,7 +86,8 @@ type OutgoingEvents = {
   [OutgoingEvent.SendPerson]: { name: string; age: number };
 };
 
-// It's important to use interfaces instead of `type Combined = OutgoingEvents & IncommingEvents` while combining `Events` to keep 100% type safety!
+// It's important to use interfaces instead of `type Combined = OutgoingEvents & IncommingEvents`
+// while combining `Events` to keep 100% type safety!
 interface IMyEventEmitterEvents extends OutgoingEvents, IncommingEvents {}
 
 class BidirectionalCommunication extends TypedEventEmitter<
