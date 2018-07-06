@@ -2,7 +2,7 @@
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/elderapo/typed-event-emitter.svg)](https://greenkeeper.io/)
 
-Strongly typed similar event emitter with similar API to native [EventEmitter](https://nodejs.org/api/events.html).
+Strongly typed event emitter with API similar to native [EventEmitter](https://nodejs.org/api/events.html).
 
 ### How to install
 
@@ -17,7 +17,7 @@ npm install @elderapo/typed-event-emitter
 ```typescript
 import { TypedEventEmitter } from "@elderapo/typed-event-emitter";
 
-const enum Event {
+enum Event {
   SomeEvent0,
   SomeEvent1,
   SomeEvent_StringKey = "lalala"
