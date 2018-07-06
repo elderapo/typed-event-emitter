@@ -109,7 +109,7 @@ export class TypedEventEmitter<Events> {
 
     for (let listener of listenersArray) {
       listener.func(payload);
-      if (listener.once) {
+      if (listener.once === true) {
         listenersToRemove.push(listener);
       }
     }

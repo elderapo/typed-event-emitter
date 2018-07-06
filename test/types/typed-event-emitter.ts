@@ -1,6 +1,6 @@
 import { TypedEventEmitter } from "../../src/typed-event-emitter";
 
-const enum Event {
+enum Event {
   Event1,
   Event2,
   Event3,

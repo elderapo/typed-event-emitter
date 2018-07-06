@@ -21,7 +21,7 @@ npm install @elderapo/typed-event-emitter
 ```typescript
 import { TypedEventEmitter } from "@elderapo/typed-event-emitter";
 
-const enum Event {
+enum Event {
   SomeEvent0,
   SomeEvent1,
   SomeEvent_StringKey = "lalala"
