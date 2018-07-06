@@ -9,6 +9,7 @@
   "files": [
     "dist"
   ],
+  "private": false,
   "author": "elderapo <tomek@martynski.pl>",
   "repository": {
     "type": "git",
