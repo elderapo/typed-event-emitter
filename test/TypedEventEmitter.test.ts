@@ -1,8 +1,12 @@
-import { TypedEventEmitter } from "../src/typed-event-emitter";
+import { TypedEventEmitter } from "../src/TypedEventEmitter";
+import { InternalEventEmitter } from "../src/InternalEventEmitter";
+import { EventEmitter } from "events";
+import { promisify } from "util";
 
 const createNOPFunction = () => () => {}; // tslint:disable-line
+const waitForSetImmediate = promisify(setImmediate);
 
-describe("TypedEventEmitter test", () => {
+describe("TypedEventEmitter", () => {
   it("on", done => {
     expect.assertions(2);
 
@@ -145,6 +149,7 @@ describe("TypedEventEmitter test", () => {
     const handler3 = payload => handler(payload);
     const handler4 = payload => handler(payload);
     const handler5 = payload => handler(payload);
+    const handler6 = payload => handler(payload);
 
     const remove1 = eventEmitter.on(Event.SomeEvent, handler1);
     const remove2 = eventEmitter.once(Event.SomeEvent, handler2);
@@ -159,6 +164,7 @@ describe("TypedEventEmitter test", () => {
     remove3();
     remove4();
     eventEmitter.removeListener(Event.SomeEvent, handler5);
+    eventEmitter.off(Event.SomeEvent, handler6);
 
     eventEmitter.emit(Event.SomeEvent, "last");
 
@@ -168,56 +174,42 @@ describe("TypedEventEmitter test", () => {
     });
   });
 
-  it("removeAllListeners", done => {
-    expect.assertions(1);
-
+  it("removeAllListeners", () => {
     enum Event {
-      SomeEvent
+      SomeEvent1,
+      SomeEvent2,
+      SomeEvent3
     }
 
     type Events = {
-      [Event.SomeEvent]: string;
+      [Event.SomeEvent1]: string;
+      [Event.SomeEvent2]: number;
+      [Event.SomeEvent3]: "aa" | "bb";
     };
 
     const eventEmitter = new TypedEventEmitter<Events>();
 
-    let handlerCallsCount = 0;
-    const handler = payload => {
-      handlerCallsCount++;
-    };
+    eventEmitter.on(Event.SomeEvent1, createNOPFunction());
+    eventEmitter.on(Event.SomeEvent1, createNOPFunction());
+    eventEmitter.once(Event.SomeEvent1, createNOPFunction());
 
-    eventEmitter.on(Event.SomeEvent, handler);
-    eventEmitter.once(Event.SomeEvent, handler);
-    eventEmitter.on(Event.SomeEvent, handler);
+    eventEmitter.once(Event.SomeEvent3, createNOPFunction());
 
-    eventEmitter.emit(Event.SomeEvent, "payload");
+    expect(eventEmitter.listeners(Event.SomeEvent1).length).toBe(3);
+    expect(eventEmitter.listeners(Event.SomeEvent2).length).toBe(0);
+    expect(eventEmitter.listeners(Event.SomeEvent3).length).toBe(1);
 
-    eventEmitter.removeAllListeners(Event.SomeEvent);
+    eventEmitter.removeAllListeners(Event.SomeEvent1);
 
-    eventEmitter.emit(Event.SomeEvent, "payload");
-
-    eventEmitter.on(Event.SomeEvent, handler);
-    eventEmitter.once(Event.SomeEvent, handler);
-    eventEmitter.on(Event.SomeEvent, handler);
+    expect(eventEmitter.listeners(Event.SomeEvent1).length).toBe(0);
+    expect(eventEmitter.listeners(Event.SomeEvent2).length).toBe(0);
+    expect(eventEmitter.listeners(Event.SomeEvent3).length).toBe(1);
 
     eventEmitter.removeAllListeners();
 
-    eventEmitter.emit(Event.SomeEvent, "payload");
-
-    setImmediate(() => {
-      expect(handlerCallsCount).toBe(3);
-      done();
-    });
-  });
-
-  it("setMaxListeners/getMaxListeners", () => {
-    const eventEmitter = new TypedEventEmitter<{}>();
-
-    expect(eventEmitter.getMaxListeners()).toBe(TypedEventEmitter.defaultMaxListeners);
-
-    eventEmitter.setMaxListeners(666);
-
-    expect(eventEmitter.getMaxListeners()).toBe(666);
+    expect(eventEmitter.listeners(Event.SomeEvent1).length).toBe(0);
+    expect(eventEmitter.listeners(Event.SomeEvent2).length).toBe(0);
+    expect(eventEmitter.listeners(Event.SomeEvent3).length).toBe(0);
   });
 
   it("listeners", () => {
@@ -380,4 +372,62 @@ describe("TypedEventEmitter test", () => {
     ee.emit(OutgoingEvent.SendAge, 20);
     ee.emit(IncommingEvent.SomeData, [1, 2, 3]);
   });
+
+  it("from InternalEventEmitter", done => {
+    const eventEmitter = new InternalEventEmitter();
+    testEventEmitter(eventEmitter, done);
+  });
+
+  it("from native EventEmitter (NodeJS)", done => {
+    const eventEmitter = new EventEmitter();
+    testEventEmitter(eventEmitter as InternalEventEmitter, done);
+  });
 });
+
+const testEventEmitter = async (eventEmitter: InternalEventEmitter, done: jest.DoneCallback) => {
+  expect.assertions(8);
+
+  enum Event {
+    SomeEvent1,
+    SomeEvent2
+  }
+
+  type Events = {
+    [Event.SomeEvent1]: string;
+    [Event.SomeEvent2]: number;
+  };
+
+  const tee = TypedEventEmitter.fromEventEmitter<Events>(eventEmitter);
+
+  const handler1 = jest.fn();
+  const handler2 = jest.fn();
+  const handler3 = jest.fn();
+  const handler4 = jest.fn();
+
+  eventEmitter.on(Event.SomeEvent1, handler1);
+  eventEmitter.once(Event.SomeEvent1, handler2);
+  tee.on(Event.SomeEvent1, handler3);
+  tee.once(Event.SomeEvent1, handler4);
+
+  tee.emit(Event.SomeEvent1, "payload 123");
+  await waitForSetImmediate();
+
+  [handler1, handler2, handler3, handler4].map(h => expect(h).toBeCalledWith("payload 123"));
+
+  const handler5 = jest.fn();
+  const handler6 = jest.fn();
+  const handler7 = jest.fn();
+  const handler8 = jest.fn();
+
+  eventEmitter.on(Event.SomeEvent1, handler5);
+  eventEmitter.once(Event.SomeEvent1, handler6);
+  tee.on(Event.SomeEvent1, handler7);
+  tee.once(Event.SomeEvent1, handler8);
+
+  eventEmitter.emit(Event.SomeEvent1, "payload 666");
+  await waitForSetImmediate();
+
+  [handler5, handler6, handler7, handler8].map(h => expect(h).toBeCalledWith("payload 666"));
+
+  done();
+};
