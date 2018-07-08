@@ -17,7 +17,7 @@ yarn add @elderapo/typed-event-emitter
 npm install @elderapo/typed-event-emitter
 ```
 
-### Basic usage
+### Usage
 
 ```typescript
 import { TypedEventEmitter } from "@elderapo/typed-event-emitter";
@@ -56,56 +56,41 @@ removeListener2();
 removeListener3();
 ```
 
-### Advanced usage
+### [More examples](https://github.com/elderapo/typed-event-emitter/tree/master/src/examples)
+
+### Cavecats:
+
 ```typescript
 import { TypedEventEmitter } from "@elderapo/typed-event-emitter";
+import { EventEmitter } from "events";
 
-enum IncommingEvent {
-  SomeData,
-  SomeOtherData,
-  SomeOtherOtherData = "some-other-other-data"
+// some event emitter from external library
+const ee = new EventEmitter();
+
+setInterval(() => {
+  ee.emit("0"); // <-- notice "0" instead of 0
+}, 500);
+
+enum Event {
+  SomeEvent // === 0 number
 }
 
-type IncommingEvents = {
-  [IncommingEvent.SomeData]: number[];
-  [IncommingEvent.SomeOtherData]: {};
-  [IncommingEvent.SomeOtherOtherData]: { name: string; age: number };
+type Events = {
+  [Event.SomeEvent]: void;
 };
 
-// `OutgoingEvent.SendName = 3;` so it doesn't overlap with `IncommingEvent.SomeData = 0;`
-// Remove or set it to `0` and see what happens with `IMyEventEmitterEvents` :)
-enum OutgoingEvent {
-  SendName = 3,
-  SendAge,
-  SendPerson = "send-person"
-}
+const tee = TypedEventEmitter.fromEventEmitter<Events>(ee);
 
-type OutgoingEvents = {
-  [OutgoingEvent.SendName]: string;
-  [OutgoingEvent.SendAge]: number;
-  [OutgoingEvent.SendPerson]: { name: string; age: number };
-};
+/*
+	For EventEmitter "0" and 0 are the same because it uses basic {} as key/value:
 
-// It's important to use interfaces instead of `type Combined = OutgoingEvents & IncommingEvents`
-// while combining `Events` to keep 100% type safety!
-interface IMyEventEmitterEvents extends OutgoingEvents, IncommingEvents {}
+	const a = {};
+	a[123] = 123;
+	a["123"]++;
+	a[123] === 124; // true
+*/
 
-class BidirectionalCommunication extends TypedEventEmitter<
-  IMyEventEmitterEvents
-> {}
-
-const ee = new BidirectionalCommunication();
-
-ee.emit(OutgoingEvent.SendName, "name"); // ok
-ee.emit(OutgoingEvent.SendName, 123); // wrong type - TS error
-
-ee.emit(OutgoingEvent.SendAge, 20); // ok
-ee.emit(OutgoingEvent.SendAge, "20"); // wrong type - TS error
-
-ee.emit(OutgoingEvent.SendPerson, { name: "name", age: 123 }); // ok
-ee.emit(OutgoingEvent.SendPerson, { name: "name" }); // wrong type - TS error
-
-ee.on(IncommingEvent.SomeData, payload => {}); // type === number[]
-ee.on(IncommingEvent.SomeOtherData, payload => {}); // type === {}
-ee.on(IncommingEvent.SomeOtherOtherData, payload => {}); // type === { name: string; age: number };
+tee.on(Event.SomeEvent, () => {
+  console.log(`Received event!`);
+});
 ```

@@ -3,9 +3,9 @@
   "version": "1.2.0",
   "description": "",
   "keywords": [],
-  "main": "dist/typed-event-emitter.umd.js",
-  "module": "dist/typed-event-emitter.es5.js",
-  "typings": "dist/types/typed-event-emitter.d.ts",
+  "main": "dist/TypedEventEmitter.umd.js",
+  "module": "dist/TypedEventEmitter.es5.js",
+  "typings": "dist/types/TypedEventEmitter.d.ts",
   "files": [
     "dist"
   ],
@@ -22,7 +22,7 @@
   "scripts": {
     "lint": "tslint -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
     "prebuild": "rimraf dist",
-    "build": "tsc --module commonjs && rollup -c rollup.config.ts && typedoc --excludePrivate --out docs --target es6 --theme minimal --mode file src",
+    "build": "tsc --module commonjs && rollup -c rollup.config.ts && typedoc --excludePrivate --out docs --target es6 --theme minimal --mode file src/TypedEventEmitter.ts",
     "start": "rollup -c rollup.config.ts -w",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -95,10 +95,12 @@
     "rollup": "^0.62.0",
     "rollup-plugin-commonjs": "^9.0.0",
     "rollup-plugin-json": "^3.0.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-sourcemaps": "^0.4.2",
     "rollup-plugin-typescript2": "^0.15.1",
     "semantic-release": "^15.6.3",
+    "travis-deploy-once": "^5.0.1",
     "ts-jest": "^23.0.0",
     "ts-node": "^7.0.0",
     "tslint": "5.10.0",
@@ -106,7 +108,6 @@
     "tslint-config-standard": "^7.0.0",
     "typedoc": "^0.11.0",
     "typescript": "^2.9.2",
-    "validate-commit-msg": "^2.12.2",
-    "travis-deploy-once": "^5.0.1"
+    "validate-commit-msg": "^2.12.2"
   }
 }
