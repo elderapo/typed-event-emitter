@@ -1,5 +1,4 @@
-import { InternalEventEmitter } from "./InternalEventEmitter";
-import { EventEmitter as NativeEventEmitter } from "events";
+import { EventEmitter } from "events";
 
 export type RemoveEventListener = () => void;
 export type EventHandler = (payload: any) => void;
@@ -11,21 +10,19 @@ export enum InternalEventEmitterEvent {
 
 export type InternalEventEmitterEvents = {
   [InternalEventEmitterEvent.NewListener]: EventHandler;
-  [InternalEventEmitterEvent.RemoveListener]: EventHandler;
+  [InternalEventEmitterEvent.RemoveListener]: { event: any; listener: EventHandler };
 };
 
 export class TypedEventEmitter<
   T,
   Events extends InternalEventEmitterEvents & T = InternalEventEmitterEvents & T
 > {
-  constructor(private internalEventEmitter: InternalEventEmitter = new InternalEventEmitter()) {
-    this.hookIntoInternalEventEmitter();
+  constructor(private internalEventEmitter: EventEmitter = new EventEmitter()) {
+    this.interceptEmit();
   }
 
-  static fromEventEmitter<T>(
-    eventEmitter: NativeEventEmitter | InternalEventEmitter
-  ): TypedEventEmitter<T> {
-    return new TypedEventEmitter<T>(eventEmitter as InternalEventEmitter);
+  static fromEventEmitter<T>(eventEmitter: EventEmitter): TypedEventEmitter<T> {
+    return new TypedEventEmitter<T>(eventEmitter);
   }
 
   public on<Event extends keyof Events>(
@@ -67,13 +64,6 @@ export class TypedEventEmitter<
     this.internalEventEmitter.removeListener(this.castTypedEventToEvent(event), listenerFunc);
   }
 
-  public off<Event extends keyof Events>(
-    event: Event,
-    listenerFunc: (payload: Events[Event]) => void
-  ): void {
-    this.internalEventEmitter.off(this.castTypedEventToEvent(event), listenerFunc);
-  }
-
   public removeAllListeners<Event extends keyof Events>(event?: Event): void {
     if (typeof event === "undefined") {
       this.internalEventEmitter.removeAllListeners();
@@ -92,11 +82,7 @@ export class TypedEventEmitter<
   }
 
   public listeners<Event extends keyof Events>(event: Event): EventHandler[] {
-    return this.internalEventEmitter.listeners(this.castTypedEventToEvent(event));
-  }
-
-  public rawListeners<Event extends keyof Events>(event: Event): EventHandler[] {
-    return this.internalEventEmitter.rawListeners(this.castTypedEventToEvent(event));
+    return this.internalEventEmitter.listeners(this.castTypedEventToEvent(event)) as EventHandler[];
   }
 
   public emit<Event extends keyof Events>(event: Event, payload: Events[Event]): void {
@@ -104,20 +90,36 @@ export class TypedEventEmitter<
   }
 
   public eventIdentifiers(): Array<keyof Events> {
-    return this.internalEventEmitter.eventNames() as Array<keyof Events>;
+    return this.internalEventEmitter.eventNames().map(eventIndetifier => {
+      if (typeof eventIndetifier === "symbol") {
+        return eventIndetifier;
+      }
+
+      const n = parseFloat(eventIndetifier);
+
+      return Number.isNaN(n) ? eventIndetifier : n;
+    }) as Array<keyof Events>;
   }
 
   public listenerCount<Event extends keyof Events>(event: Event): number {
     return this.internalEventEmitter.listenerCount(this.castTypedEventToEvent(event));
   }
 
-  private castTypedEventToEvent<Event extends keyof Events>(
-    event: Event
-  ): string | number | symbol {
-    return event as string | number | symbol;
+  private castTypedEventToEvent<Event extends keyof Events>(event: Event): string | symbol {
+    return event as string | symbol;
   }
 
-  private hookIntoInternalEventEmitter() {
-    const originalEmit = this.internalEventEmitter.emit;
+  private interceptEmit() {
+    let originalFunc: Function = this.internalEventEmitter.emit.bind(this.internalEventEmitter);
+
+    this.internalEventEmitter.emit = (...args: any[]) => {
+      if (args[0] === InternalEventEmitterEvent.RemoveListener) {
+        return originalFunc(args[0], {
+          event: args[1],
+          listener: args[2]
+        });
+      }
+      return originalFunc(...args);
+    };
   }
 }

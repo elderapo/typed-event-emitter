@@ -1,5 +1,4 @@
 import { TypedEventEmitter, InternalEventEmitterEvent } from "../src/TypedEventEmitter";
-import { InternalEventEmitter } from "../src/InternalEventEmitter";
 import { EventEmitter } from "events";
 import { promisify } from "util";
 
@@ -126,15 +125,17 @@ describe("TypedEventEmitter", () => {
     ]);
   });
 
-  it("removeListener", done => {
-    expect.assertions(2);
+  it("removeListener", async done => {
+    expect.assertions(3);
 
     enum Event {
-      SomeEvent
+      SomeEvent,
+      SomeEvent2 = "SOME_EVENT_2"
     }
 
     type Events = {
       [Event.SomeEvent]: string;
+      [Event.SomeEvent2]: number;
     };
 
     const eventEmitter = new TypedEventEmitter<Events>();
@@ -158,27 +159,40 @@ describe("TypedEventEmitter", () => {
     const remove3 = eventEmitter.prependListener(Event.SomeEvent, handler3);
     const remove4 = eventEmitter.prependOnceListener(Event.SomeEvent, handler4);
     eventEmitter.on(Event.SomeEvent, handler5);
+    eventEmitter.on(Event.SomeEvent2, handler6);
 
     eventEmitter.emit(Event.SomeEvent, "first");
 
-    const handlerRemoveListener = jest.fn();
+    const handlerRemoveListener1 = jest.fn();
 
-    eventEmitter.on(InternalEventEmitterEvent.RemoveListener, handlerRemoveListener);
+    eventEmitter.once(InternalEventEmitterEvent.RemoveListener, handlerRemoveListener1);
 
     remove1();
-    expect(handlerRemoveListener).toBeCalledWith(handler1);
+    await waitForSetImmediate();
+    expect(handlerRemoveListener1).toBeCalledWith({
+      event: Event.SomeEvent,
+      listener: handler1
+    });
     remove2();
     remove3();
     remove4();
     eventEmitter.removeListener(Event.SomeEvent, handler5);
-    eventEmitter.off(Event.SomeEvent, handler6);
+
+    const handlerRemoveListener2 = jest.fn();
+    eventEmitter.once(InternalEventEmitterEvent.RemoveListener, handlerRemoveListener2);
+
+    eventEmitter.removeListener(Event.SomeEvent2, handler6);
+    await waitForSetImmediate();
+    expect(handlerRemoveListener2).toBeCalledWith({
+      event: Event.SomeEvent2,
+      listener: handler6
+    });
 
     eventEmitter.emit(Event.SomeEvent, "last");
 
-    setImmediate(() => {
-      expect(handlerCallsCount).toBe(5);
-      done();
-    });
+    await waitForSetImmediate();
+    expect(handlerCallsCount).toBe(5);
+    done();
   });
 
   it("removeAllListeners", () => {
@@ -257,43 +271,18 @@ describe("TypedEventEmitter", () => {
     expect(eventEmitter.listeners(Event.SomeEvent2).length).toBe(4);
   });
 
-  it("rawListeners", () => {
-    enum Event {
-      SomeEvent1,
-      SomeEvent2 = "SomeEvent2"
-    }
-
-    type Events = {
-      [Event.SomeEvent1]: string;
-      [Event.SomeEvent2]: number;
-    };
-
-    const eventEmitter = new TypedEventEmitter<Events>();
-
-    const handler = createNOPFunction();
-
-    eventEmitter.on(Event.SomeEvent1, handler);
-    eventEmitter.once(Event.SomeEvent1, handler);
-    eventEmitter.on(Event.SomeEvent1, handler);
-
-    eventEmitter.on(Event.SomeEvent2, handler);
-    eventEmitter.once(Event.SomeEvent2, handler);
-    eventEmitter.on(Event.SomeEvent2, handler);
-    eventEmitter.on(Event.SomeEvent2, handler);
-
-    expect(eventEmitter.rawListeners(Event.SomeEvent1).length).toBe(3);
-    expect(eventEmitter.rawListeners(Event.SomeEvent2).length).toBe(4);
-  });
-
   it("eventIdentifiers", () => {
     enum Event {
       SomeEvent1,
       SomeEvent2 = "SomeEvent2"
     }
 
+    const SymbolEvent = Symbol();
+
     type Events = {
       [Event.SomeEvent1]: string;
       [Event.SomeEvent2]: number;
+      [SymbolEvent]: number;
     };
 
     const eventEmitter = new TypedEventEmitter<Events>();
@@ -309,7 +298,13 @@ describe("TypedEventEmitter", () => {
     eventEmitter.on(Event.SomeEvent2, handler);
     eventEmitter.on(Event.SomeEvent2, handler);
 
-    expect(eventEmitter.eventIdentifiers()).toMatchObject([Event.SomeEvent1, Event.SomeEvent2]);
+    eventEmitter.on(SymbolEvent, handler);
+
+    expect(eventEmitter.eventIdentifiers()).toMatchObject([
+      Event.SomeEvent1,
+      Event.SomeEvent2,
+      SymbolEvent
+    ]);
   });
 
   it("listenerCount", () => {
@@ -339,30 +334,6 @@ describe("TypedEventEmitter", () => {
     expect(eventEmitter.listenerCount(Event.SomeEvent1)).toBe(2);
     expect(eventEmitter.listenerCount(Event.SomeEvent2)).toBe(3);
     expect(eventEmitter.listenerCount(Event.SomeEvent3)).toBe(0);
-  });
-
-  it("afterAddEventListener", () => {
-    enum Event {
-      SomeEvent
-    }
-
-    type Events = {
-      [Event.SomeEvent]: string;
-    };
-
-    const eventEmitter = new TypedEventEmitter<Events>();
-
-    const originalConoleWarn = console.warn;
-
-    console.warn = jest.fn();
-
-    for (let i = 0; i < 666; i++) {
-      eventEmitter.on(Event.SomeEvent, createNOPFunction());
-    }
-
-    expect(console.warn).toHaveBeenCalledTimes(656);
-
-    console.warn = originalConoleWarn;
   });
 
   it("inheritance", done => {
@@ -418,61 +389,52 @@ describe("TypedEventEmitter", () => {
     ee.emit(IncommingEvent.SomeData, [1, 2, 3]);
   });
 
-  it("from InternalEventEmitter", done => {
-    const eventEmitter = new InternalEventEmitter();
-    testEventEmitter(eventEmitter, done);
-  });
+  it("from EventEmitter", async done => {
+    expect.assertions(8);
 
-  it("from native EventEmitter (NodeJS)", done => {
+    enum Event {
+      SomeEvent1,
+      SomeEvent2
+    }
+
+    type Events = {
+      [Event.SomeEvent1]: string;
+      [Event.SomeEvent2]: number;
+    };
+
     const eventEmitter = new EventEmitter();
-    testEventEmitter(eventEmitter as InternalEventEmitter, done);
+    const tee = TypedEventEmitter.fromEventEmitter<Events>(eventEmitter);
+
+    const handler1 = jest.fn();
+    const handler2 = jest.fn();
+    const handler3 = jest.fn();
+    const handler4 = jest.fn();
+
+    eventEmitter.on(Event.SomeEvent1 as any, handler1);
+    eventEmitter.once(Event.SomeEvent1 as any, handler2);
+    tee.on(Event.SomeEvent1, handler3);
+    tee.once(Event.SomeEvent1, handler4);
+
+    tee.emit(Event.SomeEvent1, "payload 123");
+    await waitForSetImmediate();
+
+    [handler1, handler2, handler3, handler4].map(h => expect(h).toBeCalledWith("payload 123"));
+
+    const handler5 = jest.fn();
+    const handler6 = jest.fn();
+    const handler7 = jest.fn();
+    const handler8 = jest.fn();
+
+    eventEmitter.on(Event.SomeEvent1 as any, handler5);
+    eventEmitter.once(Event.SomeEvent1 as any, handler6);
+    tee.on(Event.SomeEvent1, handler7);
+    tee.once(Event.SomeEvent1, handler8);
+
+    eventEmitter.emit(Event.SomeEvent1 as any, "payload 666");
+    await waitForSetImmediate();
+
+    [handler5, handler6, handler7, handler8].map(h => expect(h).toBeCalledWith("payload 666"));
+
+    done();
   });
 });
-
-const testEventEmitter = async (eventEmitter: InternalEventEmitter, done: jest.DoneCallback) => {
-  expect.assertions(8);
-
-  enum Event {
-    SomeEvent1,
-    SomeEvent2
-  }
-
-  type Events = {
-    [Event.SomeEvent1]: string;
-    [Event.SomeEvent2]: number;
-  };
-
-  const tee = TypedEventEmitter.fromEventEmitter<Events>(eventEmitter);
-
-  const handler1 = jest.fn();
-  const handler2 = jest.fn();
-  const handler3 = jest.fn();
-  const handler4 = jest.fn();
-
-  eventEmitter.on(Event.SomeEvent1, handler1);
-  eventEmitter.once(Event.SomeEvent1, handler2);
-  tee.on(Event.SomeEvent1, handler3);
-  tee.once(Event.SomeEvent1, handler4);
-
-  tee.emit(Event.SomeEvent1, "payload 123");
-  await waitForSetImmediate();
-
-  [handler1, handler2, handler3, handler4].map(h => expect(h).toBeCalledWith("payload 123"));
-
-  const handler5 = jest.fn();
-  const handler6 = jest.fn();
-  const handler7 = jest.fn();
-  const handler8 = jest.fn();
-
-  eventEmitter.on(Event.SomeEvent1, handler5);
-  eventEmitter.once(Event.SomeEvent1, handler6);
-  tee.on(Event.SomeEvent1, handler7);
-  tee.once(Event.SomeEvent1, handler8);
-
-  eventEmitter.emit(Event.SomeEvent1, "payload 666");
-  await waitForSetImmediate();
-
-  [handler5, handler6, handler7, handler8].map(h => expect(h).toBeCalledWith("payload 666"));
-
-  done();
-};

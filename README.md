@@ -57,3 +57,40 @@ removeListener3();
 ```
 
 ### [More examples](https://github.com/elderapo/typed-event-emitter/tree/master/src/examples)
+
+### Cavecats:
+
+```typescript
+import { TypedEventEmitter } from "@elderapo/typed-event-emitter";
+import { EventEmitter } from "events";
+
+// some event emitter from external library
+const ee = new EventEmitter();
+
+setInterval(() => {
+  ee.emit("0"); // <-- notice "0" instead of 0
+}, 500);
+
+enum Event {
+  SomeEvent // === 0 number
+}
+
+type Events = {
+  [Event.SomeEvent]: void;
+};
+
+const tee = TypedEventEmitter.fromEventEmitter<Events>(ee);
+
+/*
+	For EventEmitter "0" and 0 are the same because it uses basic {} as key/value:
+
+	const a = {};
+	a[123] = 123;
+	a["123"]++;
+	a[123] === 124; // true
+*/
+
+tee.on(Event.SomeEvent, () => {
+  console.log(`Received event!`);
+});
+```
