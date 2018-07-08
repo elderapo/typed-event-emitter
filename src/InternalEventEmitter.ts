@@ -1,4 +1,5 @@
-import { getOrCreateFromMap } from "./utils";
+import { getOrCreateFromMap, isNode } from "./utils";
+import { EventEmitter } from "events";
 
 type Event = string | number | symbol;
 type Payload = any[];
@@ -12,9 +13,7 @@ interface IInternalAddListenerOptions {
 }
 
 export class InternalEventEmitter {
-  public static defaultMaxListeners: number = 10;
-
-  private maxListeners: number = InternalEventEmitter.defaultMaxListeners;
+  private maxListeners: number = isNode ? EventEmitter.defaultMaxListeners : 10;
   private listenersMap: Map<Event, Listener[]> = new Map();
   private onceListeners: Listener[] = [];
 
@@ -128,6 +127,7 @@ export class InternalEventEmitter {
     return [];
   }
 
+  // @TODO: Investigate what this is...
   public rawListeners(event: Event): Listener[] {
     return this.listeners(event);
   }

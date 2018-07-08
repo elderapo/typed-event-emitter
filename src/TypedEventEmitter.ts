@@ -22,6 +22,12 @@ export class TypedEventEmitter<
     this.hookIntoInternalEventEmitter();
   }
 
+  static fromEventEmitter<T>(
+    eventEmitter: NativeEventEmitter | InternalEventEmitter
+  ): TypedEventEmitter<T> {
+    return new TypedEventEmitter<T>(eventEmitter as InternalEventEmitter);
+  }
+
   public on<Event extends keyof Events>(
     event: Event,
     listener: (payload: Events[Event]) => void
@@ -89,6 +95,10 @@ export class TypedEventEmitter<
     return this.internalEventEmitter.listeners(this.castTypedEventToEvent(event));
   }
 
+  public rawListeners<Event extends keyof Events>(event: Event): EventHandler[] {
+    return this.internalEventEmitter.rawListeners(this.castTypedEventToEvent(event));
+  }
+
   public emit<Event extends keyof Events>(event: Event, payload: Events[Event]): void {
     this.internalEventEmitter.emit(this.castTypedEventToEvent(event), payload);
   }
@@ -109,11 +119,5 @@ export class TypedEventEmitter<
 
   private hookIntoInternalEventEmitter() {
     const originalEmit = this.internalEventEmitter.emit;
-  }
-
-  static fromEventEmitter<T>(
-    eventEmitter: NativeEventEmitter | InternalEventEmitter
-  ): TypedEventEmitter<T> {
-    return new TypedEventEmitter<T>(eventEmitter as InternalEventEmitter);
   }
 }

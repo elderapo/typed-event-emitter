@@ -1,4 +1,4 @@
-import { TypedEventEmitter } from "../src/TypedEventEmitter";
+import { TypedEventEmitter, InternalEventEmitterEvent } from "../src/TypedEventEmitter";
 import { InternalEventEmitter } from "../src/InternalEventEmitter";
 import { EventEmitter } from "events";
 import { promisify } from "util";
@@ -127,7 +127,7 @@ describe("TypedEventEmitter", () => {
   });
 
   it("removeListener", done => {
-    expect.assertions(1);
+    expect.assertions(2);
 
     enum Event {
       SomeEvent
@@ -151,6 +151,8 @@ describe("TypedEventEmitter", () => {
     const handler5 = payload => handler(payload);
     const handler6 = payload => handler(payload);
 
+    eventEmitter.removeListener(Event.SomeEvent, handler1);
+
     const remove1 = eventEmitter.on(Event.SomeEvent, handler1);
     const remove2 = eventEmitter.once(Event.SomeEvent, handler2);
     const remove3 = eventEmitter.prependListener(Event.SomeEvent, handler3);
@@ -159,7 +161,12 @@ describe("TypedEventEmitter", () => {
 
     eventEmitter.emit(Event.SomeEvent, "first");
 
+    const handlerRemoveListener = jest.fn();
+
+    eventEmitter.on(InternalEventEmitterEvent.RemoveListener, handlerRemoveListener);
+
     remove1();
+    expect(handlerRemoveListener).toBeCalledWith(handler1);
     remove2();
     remove3();
     remove4();
@@ -212,6 +219,16 @@ describe("TypedEventEmitter", () => {
     expect(eventEmitter.listeners(Event.SomeEvent3).length).toBe(0);
   });
 
+  it("setMaxListeners/getMaxListeners", () => {
+    const eventEmitter = new TypedEventEmitter<{}>();
+
+    expect(eventEmitter.getMaxListeners()).toBe(10);
+
+    eventEmitter.setMaxListeners(666);
+
+    expect(eventEmitter.getMaxListeners()).toBe(666);
+  });
+
   it("listeners", () => {
     enum Event {
       SomeEvent1,
@@ -238,6 +255,34 @@ describe("TypedEventEmitter", () => {
 
     expect(eventEmitter.listeners(Event.SomeEvent1).length).toBe(3);
     expect(eventEmitter.listeners(Event.SomeEvent2).length).toBe(4);
+  });
+
+  it("rawListeners", () => {
+    enum Event {
+      SomeEvent1,
+      SomeEvent2 = "SomeEvent2"
+    }
+
+    type Events = {
+      [Event.SomeEvent1]: string;
+      [Event.SomeEvent2]: number;
+    };
+
+    const eventEmitter = new TypedEventEmitter<Events>();
+
+    const handler = createNOPFunction();
+
+    eventEmitter.on(Event.SomeEvent1, handler);
+    eventEmitter.once(Event.SomeEvent1, handler);
+    eventEmitter.on(Event.SomeEvent1, handler);
+
+    eventEmitter.on(Event.SomeEvent2, handler);
+    eventEmitter.once(Event.SomeEvent2, handler);
+    eventEmitter.on(Event.SomeEvent2, handler);
+    eventEmitter.on(Event.SomeEvent2, handler);
+
+    expect(eventEmitter.rawListeners(Event.SomeEvent1).length).toBe(3);
+    expect(eventEmitter.rawListeners(Event.SomeEvent2).length).toBe(4);
   });
 
   it("eventIdentifiers", () => {

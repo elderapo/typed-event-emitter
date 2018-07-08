@@ -1,4 +1,4 @@
-import { TypedEventEmitter } from "../../src/typed-event-emitter";
+import { TypedEventEmitter } from "../../src/TypedEventEmitter";
 
 enum IncommingEvent {
   SomeData,
