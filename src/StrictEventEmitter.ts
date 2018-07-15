@@ -4,50 +4,7 @@ import { EventEmitter } from "events";
 export class StrictEventEmitter implements IEventEmitter {
   private listenersMap: Map<Event, Listener[]> = new Map();
   private onceListeners: Listener[] = [];
-
   private maxListeners: number = EventEmitter.defaultMaxListeners;
-
-  private getListenrsArray(event: Event, createNotExists: boolean = true): Listener[] {
-    if (!this.listenersMap.has(event)) {
-      if (!createNotExists) {
-        return null as any;
-      }
-      this.listenersMap.set(event, []);
-    }
-    return this.listenersMap.get(event) as Listener[];
-  }
-
-  private internalAddListener(
-    event: Event,
-    listener: Listener,
-    once: boolean = false,
-    direction: "front" | "back" = "back"
-  ): this {
-    const listeners = this.getListenrsArray(event);
-    if (direction === "front") {
-      listeners.unshift(listener);
-    } else if (direction === "back") {
-      listeners.push(listener);
-    } else {
-      throw new TypeError(`Invalid direction: ${direction}!`);
-    }
-
-    if (once) {
-      this.onceListeners.push(listener);
-    }
-
-    if (listeners.length > this.maxListeners) {
-      console.warn(
-        `possible StrictEventEmitter memory leak detected. ${
-          listeners.length
-        } listeners added. Use emitter.setMaxListeners() to increase limit.`
-      );
-    }
-
-    this.emit("newListener", listener);
-
-    return this;
-  }
 
   public addListener(event: Event, listener: Listener): this {
     return this.internalAddListener(event, listener);
@@ -163,5 +120,47 @@ export class StrictEventEmitter implements IEventEmitter {
 
   public listenerCount(type: Event): number {
     return this.listeners(type).length;
+  }
+
+  private getListenrsArray(event: Event, createNotExists: boolean = true): Listener[] {
+    if (!this.listenersMap.has(event)) {
+      if (!createNotExists) {
+        return null as any;
+      }
+      this.listenersMap.set(event, []);
+    }
+    return this.listenersMap.get(event) as Listener[];
+  }
+
+  private internalAddListener(
+    event: Event,
+    listener: Listener,
+    once: boolean = false,
+    direction: "front" | "back" = "back"
+  ): this {
+    const listeners = this.getListenrsArray(event);
+    if (direction === "front") {
+      listeners.unshift(listener);
+    } else if (direction === "back") {
+      listeners.push(listener);
+    } else {
+      throw new TypeError(`Invalid direction: ${direction}!`);
+    }
+
+    if (once) {
+      this.onceListeners.push(listener);
+    }
+
+    if (listeners.length > this.maxListeners) {
+      console.warn(
+        `possible StrictEventEmitter memory leak detected. ${
+          listeners.length
+        } listeners added. Use emitter.setMaxListeners() to increase limit.`
+      );
+    }
+
+    this.emit("newListener", listener);
+
+    return this;
   }
 }
