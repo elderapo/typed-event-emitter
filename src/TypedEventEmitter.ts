@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import { IEventEmitter } from "./interfaces";
 
 export type RemoveEventListener = () => void;
 export type EventHandler = (payload: any) => void;
@@ -17,7 +18,7 @@ export class TypedEventEmitter<
   T,
   Events extends InternalEventEmitterEvents & T = InternalEventEmitterEvents & T
 > {
-  constructor(private internalEventEmitter: EventEmitter = new EventEmitter()) {
+  constructor(private internalEventEmitter: IEventEmitter = new EventEmitter()) {
     this.interceptEmit();
   }
 
@@ -95,7 +96,7 @@ export class TypedEventEmitter<
         return eventIndetifier;
       }
 
-      const n = parseFloat(eventIndetifier);
+      const n = parseFloat(eventIndetifier + "");
 
       return Number.isNaN(n) ? eventIndetifier : n;
     }) as Array<keyof Events>;
