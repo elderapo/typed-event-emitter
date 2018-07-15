@@ -3,9 +3,9 @@
   "version": "1.2.0",
   "description": "",
   "keywords": [],
-  "main": "dist/TypedEventEmitter.umd.js",
-  "module": "dist/TypedEventEmitter.es5.js",
-  "typings": "dist/types/TypedEventEmitter.d.ts",
+  "main": "dist/index.umd.js",
+  "module": "dist/index.es5.js",
+  "typings": "dist/types/index.d.ts",
   "files": [
     "dist"
   ],
