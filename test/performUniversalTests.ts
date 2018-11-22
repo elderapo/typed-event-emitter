@@ -137,16 +137,16 @@ export const performUniversalTests = (TypedEventEmitterClass: typeof TypedEventE
     const eventEmitter = new TypedEventEmitterClass<Events>();
 
     let handlerCallsCount = 0;
-    const handler = payload => {
+    const handler = () => {
       handlerCallsCount++;
     };
 
-    const handler1 = payload => handler(payload);
-    const handler2 = payload => handler(payload);
-    const handler3 = payload => handler(payload);
-    const handler4 = payload => handler(payload);
-    const handler5 = payload => handler(payload);
-    const handler6 = payload => handler(payload);
+    const handler1 = () => handler();
+    const handler2 = () => handler();
+    const handler3 = () => handler();
+    const handler4 = () => handler();
+    const handler5 = () => handler();
+    const handler6 = () => handler();
 
     eventEmitter.removeListener(Event.SomeEvent, handler1);
 
