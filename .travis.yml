@@ -4,8 +4,8 @@ branches:
     - master
     - /^greenkeeper/.*$/
 cache:
-  # yarn: true # tmp
-  npm: true
+  yarn: true
+  # npm: true
   directories:
     - node_modules
 notifications:
