@@ -5,7 +5,8 @@ install:
   - ps: Install-Product node $env:nodejs_version
   - node --version
   - yarn --version
-  - npm install # https://github.com/Microsoft/dtslint/issues/123
+  # - npm install # https://github.com/Microsoft/dtslint/issues/123
+  - yarn install
 
 test_script:
   - yarn test:prod
