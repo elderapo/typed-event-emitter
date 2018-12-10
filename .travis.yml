@@ -3,17 +3,13 @@ branches:
   only:
     - master
     - /^greenkeeper/.*$/
-cache:
-  # yarn: true
-  npm: true
-  directories:
-    - node_modules
+cache: yarn
 notifications:
   email: false
 node_js: 8
+install:
+  - yarn
 script:
-  - npm install # https://github.com/Microsoft/dtslint/issues/123
-  # - yarn install --production=false
   - yarn test:prod
   - yarn build
 after_success:
