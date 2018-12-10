@@ -6,6 +6,7 @@
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/emtsip4f89a8y0h8?svg=true)](https://ci.appveyor.com/project/elderapo/typed-event-emitter)
 [![Coveralls](https://img.shields.io/coveralls/elderapo/typed-event-emitter.svg)](https://coveralls.io/github/elderapo/typed-event-emitter)
 [![Dev Dependencies](https://david-dm.org/elderapo/typed-event-emitter/dev-status.svg)](https://david-dm.org/elderapo/typed-event-emitter?type=dev)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Felderapo%2Ftyped-event-emitter.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Felderapo%2Ftyped-event-emitter?ref=badge_shield)
 
 Strongly typed event emitter with API similar to native [EventEmitter](https://nodejs.org/api/events.html).
 
@@ -94,3 +95,7 @@ tee.on(Event.SomeEvent, () => {
   console.log(`Received event!`);
 });
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Felderapo%2Ftyped-event-emitter.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Felderapo%2Ftyped-event-emitter?ref=badge_large)
