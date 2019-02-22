@@ -83,7 +83,7 @@
     "coveralls": "^3.0.0",
     "cross-env": "^5.0.1",
     "cz-conventional-changelog": "^2.0.0",
-    "dtslint": "^0.4.0",
+    "dtslint": "^0.5.0",
     "husky": "^1.0.0",
     "jest": "^23.3.0",
     "lint-staged": "^8.1.4",
