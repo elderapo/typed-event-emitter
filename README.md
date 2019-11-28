@@ -59,7 +59,7 @@ removeListener3();
 
 ### [More examples](https://github.com/elderapo/typed-event-emitter/tree/master/src/examples)
 
-### Cavecats:
+### Caveats:
 
 ```typescript
 import { TypedEventEmitter } from "@elderapo/typed-event-emitter";
